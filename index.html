@@ -13,18 +13,12 @@
         .header-cell { background: #007bff; color: white; font-weight: bold; font-size: 20px; padding: 10px 0; display: flex; align-items: center; justify-content: center; border-radius: 5px; }
         .number-cell { background: white; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; cursor: pointer; border-radius: 5px; user-select: none; transition: background 0.2s; }
         .number-cell.marked { background: #ff4757; color: white; border-radius: 50%; box-shadow: inset 0 0 10px rgba(0,0,0,0.3); }
+        
+        /* Estilos para la casilla central interactiva con el Logo */
         .free-cell-logo { background: #ffffff !important; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 4px; cursor: pointer; border: 3px solid #2ed573; box-sizing: border-box; border-radius: 5px; }
         .free-cell-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
         .free-cell-logo:active { transform: scale(0.95); background-color: #e8f9ed !important; }
     </style>
-    
-    <!-- Librería embebida para saltar bloqueos de red corporativa -->
-    <script type="text/javascript">
-        !function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"function"==typeof define&&define.amd?define(["exports"],e):e((t="undefined"!=typeof globalThis?globalThis:t||self).emailjs={})}(this,(function(t){"use strict";var e={_init:function(t,e){void 0===e&&(e="https://emailjs.com"),this.userID=t,this.origin=e},send:function(t,e,r,n){var i=this;void 0===n&&(n=this.userID);var o={service_id:t,template_id:e,template_params:r,user_id:n};return new Promise((function(t,e){var r=new XMLHttpRequest;r.open("POST",i.origin+"/api/v1.0/email/send",!0),r.setRequestHeader("Content-type","application/json"),r.onload=function(){var n=r.status;200===n?t({status:n,text:r.responseText}):e({status:n,text:r.responseText})},r.onerror=function(){e(new Error("Network Error"))},r.send(JSON.stringify(o))}))}};t.init=e._init.bind(e),t.send=e.send.bind(e),Object.defineProperty(t,"__esModule",{value:!0})}));
-        
-        // Inicialización inmediata con tu llave pública de EmailJS
-        emailjs.init("9Nt-xBzDZrGc388NK");
-    </script>
 </head>
 <body>
 
@@ -41,6 +35,7 @@
     </div>
 
     <script>
+        // 1. Obtener datos de la URL
         const urlParams = new URLSearchParams(window.location.search);
         const nombreRaw = urlParams.get('nombre') || "Invitado";
         const nombre = decodeURIComponent(nombreRaw.replace(/_/g, ' '));
@@ -51,6 +46,7 @@
         document.getElementById('txtCedula').innerText = cedula;
         document.getElementById('txtCarton').innerText = cartonId;
 
+        // 2. Generador matemático de cartones aleatorios únicos
         function cyrb128(str) {
             let h1 = 1779033703, h2 = 3024733165;
             for (let i = 0, k; i < str.length; i++) {
@@ -95,19 +91,21 @@
             obtenerNumerosColumna(61, 75)
         ];
 
+        // 3. Dibujar el tablero en pantalla
         const board = document.getElementById('bingoBoard');
-        let botonPresionado = false;
 
         for (let fila = 0; fila < 5; fila++) {
             for (let col = 0; col < 5; col++) {
                 const cell = document.createElement('div');
                 
                 if (fila === 2 && col === 2) {
+                    // Botón central con el logo de Eficacia
                     cell.className = "number-cell free-cell-logo";
                     cell.innerHTML = '<img src="https://eficacia.com.co/wp-content/uploads/2020/05/logo.svg" alt="Logo Eficacia">';
                     
+                    // Al hacer clic salta la alerta manual informativa
                     cell.addEventListener('click', () => {
-                        notificarGanadorManual();
+                        alert(`🎉 ¡Felicidades ${nombre}! 🎉\n\nHas cantado ¡BINGO! con el cartón N° ${cartonId}.\n\nPor favor, toma una captura de pantalla completa de este mensaje junto con tu tablero marcado y envíasela al administrador del juego para validar tus números.`);
                     });
                 } else {
                     cell.className = "number-cell";
@@ -119,34 +117,6 @@
                 }
                 board.appendChild(cell);
             }
-        }
-
-        function notificarGanadorManual() {
-            if (botonPresionado) {
-                alert("Ya has enviado tu reporte de Bingo previamente.");
-                return;
-            }
-
-            const confirmar = confirm("¿Completaste tu juego y deseas reportar ¡BINGO!?");
-            if (!confirmar) return;
-
-            botonPresionado = true;
-
-            const datosPlantilla = {
-                nombre: nombre,
-                cedula: cedula,
-                carton: cartonId
-            };
-
-            emailjs.send("service_l0hu9p6", "template_6svg12c", datosPlantilla)
-                .then(function(response) {
-                    alert("¡BINGO REPORTADO! Tus datos fueron enviados con éxito.");
-                    console.log('Correo enviado con éxito!', response.status, response.text);
-                }, function(error) {
-                    alert("Hubo un problema enviando el reporte debido a bloqueos de la red. Por favor, toma una captura de pantalla y notifica al administrador.");
-                    console.error('Error al enviar el correo...', error);
-                    botonPresionado = false; 
-                });
         }
     </script>
 </body>

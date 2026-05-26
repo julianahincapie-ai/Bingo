@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bingo Virtual Interactivo</title>
+    <!-- Conexión con la librería oficial de EmailJS -->
+    <script type="text/javascript" src="https://jsdelivr.net"></script>
+    <script type="text/javascript">
+        // Llave pública vinculada a tu cuenta de EmailJS
+        emailjs.init("9Nt-xBzDZrGc388NK");
+    </script>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; background-color: #f0f2f5; margin: 10px; }
         .info-card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: inline-block; text-align: left; margin-bottom: 15px; width: 90%; max-width: 400px; }
@@ -13,29 +19,28 @@
         .header-cell { background: #007bff; color: white; font-weight: bold; font-size: 20px; padding: 10px 0; display: flex; align-items: center; justify-content: center; border-radius: 5px; }
         .number-cell { background: white; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; cursor: pointer; border-radius: 5px; user-select: none; transition: background 0.2s; }
         .number-cell.marked { background: #ff4757; color: white; border-radius: 50%; box-shadow: inset 0 0 10px rgba(0,0,0,0.3); }
-        .free-cell { background: #2ed573; color: white; font-size: 12px; }
+        .free-cell { background: #ffffff; display: flex; align-items: center; justify-content: center; }
+        .free-cell img { max-width: 90%; max-height: 90%; border-radius: 50%; object-fit: contain; }
     </style>
 </head>
 <body>
 
     <h2>🎰 BINGO VIRTUAL 🎰</h2>
 
-    <!-- Datos del Jugador -->
     <div class="info-card">
-        <p>👤 **Jugador:** <span id="txtNombre">Cargando...</span></p>
-        <p>🪪 **Cédula:** <span id="txtCedula">Cargando...</span></p>
-        <p>🎟️ **N° de Cartón:** <span id="txtCarton">Cargando...</span></p>
+        <p>👤 <b>Jugador:</b> <span id="txtNombre">Cargando...</span></p>
+        <p>🪪 <b>Cédula:</b> <span id="txtCedula">Cargando...</span></p>
+        <p>🎟️ <b>N° de Cartón:</b> <span id="txtCarton">Cargando...</span></p>
     </div>
 
-    <!-- Tablero de Bingo -->
     <div class="bingo-board" id="bingoBoard">
         <div class="header-cell">B</div><div class="header-cell">I</div><div class="header-cell">N</div><div class="header-cell">G</div><div class="header-cell">O</div>
     </div>
 
     <script>
-        // 1. Obtener datos de la URL (Ejemplo: ?nombre=Juan&cedula=123&carton=001)
         const urlParams = new URLSearchParams(window.location.search);
-        const nombre = urlParams.get('nombre') || "Invitado";
+        const nombreRaw = urlParams.get('nombre') || "Invitado";
+        const nombre = decodeURIComponent(nombreRaw.replace(/_/g, ' '));
         const cedula = urlParams.get('cedula') || "000000";
         const cartonId = urlParams.get('carton') || "000";
 
@@ -43,7 +48,6 @@
         document.getElementById('txtCedula').innerText = cedula;
         document.getElementById('txtCarton').innerText = cartonId;
 
-        // 2. Generador de números únicos basado en el ID del cartón (Seed)
         function cyrb128(str) {
             let h1 = 1779033703, h2 = 3024733165;
             for (let i = 0, k; i < str.length; i++) {
@@ -67,7 +71,7 @@
             }
         }
         const seed = cyrb128(cartonId + cedula);
-        const rand = sfc32(seed[0], seed[1], 1000, 2000);
+        const rand = sfc32(seed, seed, 1000, 2000);
 
         function obtenerNumerosColumna(min, max) {
             let opciones = [];
@@ -75,50 +79,46 @@
             let resultado = [];
             while (resultado.length < 5) {
                 let index = Math.floor(rand() * opciones.length);
-                resultado.push(opciones.splice(index, 1)[0]);
+                resultado.push(opciones.splice(index, 1));
             }
             return resultado;
         }
 
-        // Rangos oficiales Bingo 1-75
         const columnas = [
-            obtenerNumerosColumna(1, 15),   // B
-            obtenerNumerosColumna(16, 30),  // I
-            obtenerNumerosColumna(31, 45),  // N
-            obtenerNumerosColumna(46, 60),  // G
-            obtenerNumerosColumna(61, 75)   // O
+            obtenerNumerosColumna(1, 15),
+            obtenerNumerosColumna(16, 30),
+            obtenerNumerosColumna(31, 45),
+            obtenerNumerosColumna(46, 60),
+            obtenerNumerosColumna(61, 75)
         ];
 
-               // 3. Dibujar el tablero en pantalla
+        // 3. Dibujar el tablero en pantalla
         const board = document.getElementById('bingoBoard');
-        let juegoGanado = false; // Evita que se envíen múltiples correos
+        let juegoGanado = false;
 
         for (let fila = 0; fila < 5; fila++) {
             for (let col = 0; col < 5; col++) {
                 const cell = document.createElement('div');
                 
-                // Casilla central libre con el LOGO de tu compañía
                 if (fila === 2 && col === 2) {
                     cell.className = "number-cell free-cell marked";
-                    // REEMPLAZA ESTA URL POR EL ENLACE REAL DE TU LOGO (Debe ser un link público terminando en .png o .jpg)
-                    cell.innerHTML = '<img src="https://placeholder.com" alt="Logo" style="max-width: 90%; max-height: 90%; border-radius: 50%;">';
+                    // Logo oficial de Eficacia asignado a la casilla central libre
+                    cell.innerHTML = '<img src="https://media.licdn.com/dms/image/v2/C560BAQFGsoaeHFq_aw/company-logo_200_200/company-logo_200_200/0/1670432826989/eficacia_logo?e=2147483647&v=beta&t=4v9g4tGnH8oiIPygsUxAuRA5PT0mnQ7-MOz-JvYSb1Y" alt="Bingo">';
                 } else {
                     cell.className = "number-cell";
                     cell.innerText = columnas[col][fila];
                     
-                    // Evento de marcado fácil con un toque
                     cell.addEventListener('click', () => {
                         cell.classList.toggle('marked');
-                        verificarBingo(); // Cada vez que marquen, revisa si ganaron
+                        verificarBingo();
                     });
                 }
                 board.appendChild(cell);
             }
         }
 
-        // Función para verificar si se llenó el cartón completo
         function verificarBingo() {
-            if (juegoGanado) return; // Si ya ganó y notificó, no hace nada más
+            if (juegoGanado) return;
 
             const todasLasCasillas = document.querySelectorAll('.number-cell');
             let casillasMarcadas = 0;
@@ -129,25 +129,30 @@
                 }
             });
 
-            // Un cartón clásico tiene 25 casillas (incluyendo el centro libre)
+            // Al marcar las 25 casillas (cartón lleno) se activa la alerta de bingo
             if (casillasMarcadas === 25) {
                 juegoGanado = true;
                 notificarGanador();
             }
         }
 
-        // Función para enviar la alerta al correo
         function notificarGanador() {
-            alert("¡FELICIDADES! ¡HAS HECHO BINGO!");
-            
-            const correoDestino = "darlin_villa@eficacia.com.co";
-            const asunto = encodeURIComponent("¡Alerta de Bingo Ganador!");
-            const mensaje = encodeURIComponent(`El participante ${nombre} con cédula ${cedula} y cartón N° ${cartonId} ha completado su cartón.`);
-            
-            // Método directo: Abre el gestor de correo del usuario listo para enviar
-            window.location.href = `mailto:${correoDestino}?subject=${asunto}&body=${mensaje}`;
-        }
+            alert("¡BINGO! Tus datos han sido enviados para validación.");
 
+            const datosPlantilla = {
+                nombre: nombre,
+                cedula: cedula,
+                carton: cartonId
+            };
+
+            // Envío automatizado con tus credenciales de EmailJS
+            emailjs.send("service_l0hu9p6", "template_6svg12c", datosPlantilla)
+                .then(function(response) {
+                    console.log('Correo enviado con éxito!', response.status, response.text);
+                }, function(error) {
+                    console.error('Error al enviar el correo...', error);
+                });
+        }
     </script>
 </body>
 </html>

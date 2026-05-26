@@ -35,7 +35,7 @@
     </div>
 
     <script>
-        // 1. Obtener datos de la URL de forma estricta
+        // 1. Obtener datos de la URL
         const urlParams = new URLSearchParams(window.location.search);
         const nombreRaw = urlParams.get('nombre') || "Invitado";
         const nombre = decodeURIComponent(nombreRaw.replace(/_/g, ' '));
@@ -46,16 +46,23 @@
         document.getElementById('txtCedula').innerText = cedula;
         document.getElementById('txtCarton').innerText = cartonId;
 
-        // 2. Algoritmo matemático para fijar la aleatoriedad única por cartón (Seed)
+        // 2. El generador matemático original basado en CYRB128 y SFC32
         function cyrb128(str) {
-            let h1 = 1779033703, h2 = 3024733165;
+            let h1 = 1779033703, h2 = 3024733165, h3 = 3362453611, h4 = 502492252;
             for (let i = 0, k; i < str.length; i++) {
                 k = str.charCodeAt(i);
                 h1 = h2 ^ Math.imul(h1 ^ k, 597399067);
-                h2 = h1 ^ Math.imul(h2 ^ k, 2869860233);
+                h2 = h3 ^ Math.imul(h2 ^ k, 2869860233);
+                h3 = h4 ^ Math.imul(h3 ^ k, 951274213);
+                h4 = h1 ^ Math.imul(h4 ^ k, 2716044179);
             }
-            return [h1>>>0, h2>>>0];
+            h1 = Math.imul(h3 ^ (h1 >>> 18), 597399067);
+            h2 = Math.imul(h4 ^ (h2 >>> 22), 2869860233);
+            h3 = Math.imul(h1 ^ (h3 >>> 17), 951274213);
+            h4 = Math.imul(h2 ^ (h4 >>> 19), 2716044179);
+            return [(h1^h2^h3^h4)>>>0, (h2^h1)>>>0, (h3^h1)>>>0, (h4^h1)>>>0];
         }
+
         function sfc32(a, b, c, d) {
             return function() {
                 a >>>= 0; b >>>= 0; c >>>= 0; d >>>= 0;
@@ -69,10 +76,10 @@
                 return (t >>> 0) / 4294967296;
             }
         }
-        
-        // El generador lee el ID único del cartón para mezclar las opciones
-        const seed = cyrb128(cartonId + "-" + cedula);
-        const rand = sfc32(seed[0], seed[1], 1000, 2000);
+
+        // Aquí se genera la semilla única mezclando el número de cartón y la cédula
+        const datosSemilla = cyrb128(cartonId + "-" + cedula);
+        const rand = sfc32(datosSemilla[0], datosSemilla[1], datosSemilla[2], datosSemilla[3]);
 
         function obtenerNumerosColumna(min, max) {
             let opciones = [];
@@ -102,11 +109,11 @@
                 const cell = document.createElement('div');
                 
                 if (fila === 2 && col === 2) {
-                    // Botón central con el logo de Eficacia
+                    // Botón del medio con el logo de Eficacia
                     cell.className = "number-cell free-cell-logo";
                     cell.innerHTML = '<img src="https://eficacia.com.co/wp-content/uploads/2020/05/logo.svg" alt="Logo Eficacia">';
                     
-                    // Al hacer clic salta la alerta manual informativa
+                    // Alerta manual informativa sin llamadas a internet
                     cell.addEventListener('click', () => {
                         alert(`🎉 ¡Felicidades ${nombre}! 🎉\n\nHas cantado ¡BINGO! con el cartón N° ${cartonId}.\n\nPor favor, toma una captura de pantalla completa de este mensaje junto con tu tablero marcado y envíasela al administrador del juego para validar tus números.`);
                     });

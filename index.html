@@ -103,10 +103,6 @@
                     cell.className = "number-cell free-cell-logo";
                     cell.innerHTML = '<img src="https://eficacia.com.co/wp-content/uploads/2020/05/logo.svg" alt="Logo Eficacia">';
                     
-                    // Al hacer clic salta la alerta manual informativa
-                    cell.addEventListener('click', () => {
-                        alert(`🎉 ¡Felicidades ${nombre}! 🎉\n\nHas cantado ¡BINGO! con el cartón N° ${cartonId}.\n\nPor favor, toma una captura de pantalla completa de este mensaje junto con tu tablero marcado y envíasela al administrador del juego para validar tus números.`);
-                    });
                 } else {
                     cell.className = "number-cell";
                     cell.innerText = columnas[col][fila];

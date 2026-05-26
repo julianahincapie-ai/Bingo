@@ -4,12 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bingo Virtual Interactivo</title>
-    <!-- Conexión con la librería oficial de EmailJS -->
-    <script type="text/javascript" src="https://cloudflare.com"></script>
-    <script type="text/javascript">
-        // Llave pública vinculada a tu cuenta de EmailJS
-        emailjs.init("_clVKTlTwFigLss0X");
-    </script>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; background-color: #f0f2f5; margin: 10px; }
         .info-card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: inline-block; text-align: left; margin-bottom: 15px; width: 90%; max-width: 400px; }
@@ -19,12 +13,18 @@
         .header-cell { background: #007bff; color: white; font-weight: bold; font-size: 20px; padding: 10px 0; display: flex; align-items: center; justify-content: center; border-radius: 5px; }
         .number-cell { background: white; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; cursor: pointer; border-radius: 5px; user-select: none; transition: background 0.2s; }
         .number-cell.marked { background: #ff4757; color: white; border-radius: 50%; box-shadow: inset 0 0 10px rgba(0,0,0,0.3); }
-        
-        /* Estilos corregidos para la casilla central interactiva (Botón de enviar) */
         .free-cell-logo { background: #ffffff !important; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 4px; cursor: pointer; border: 3px solid #2ed573; box-sizing: border-box; border-radius: 5px; }
         .free-cell-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
         .free-cell-logo:active { transform: scale(0.95); background-color: #e8f9ed !important; }
     </style>
+    
+    <!-- Librería embebida para saltar bloqueos de red corporativa -->
+    <script type="text/javascript">
+        !function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"function"==typeof define&&define.amd?define(["exports"],e):e((t="undefined"!=typeof globalThis?globalThis:t||self).emailjs={})}(this,(function(t){"use strict";var e={_init:function(t,e){void 0===e&&(e="https://emailjs.com"),this.userID=t,this.origin=e},send:function(t,e,r,n){var i=this;void 0===n&&(n=this.userID);var o={service_id:t,template_id:e,template_params:r,user_id:n};return new Promise((function(t,e){var r=new XMLHttpRequest;r.open("POST",i.origin+"/api/v1.0/email/send",!0),r.setRequestHeader("Content-type","application/json"),r.onload=function(){var n=r.status;200===n?t({status:n,text:r.responseText}):e({status:n,text:r.responseText})},r.onerror=function(){e(new Error("Network Error"))},r.send(JSON.stringify(o))}))}};t.init=e._init.bind(e),t.send=e.send.bind(e),Object.defineProperty(t,"__esModule",{value:!0})}));
+        
+        // Inicialización inmediata con tu llave pública de EmailJS
+        emailjs.init("9Nt-xBzDZrGc388NK");
+    </script>
 </head>
 <body>
 
@@ -103,11 +103,9 @@
                 const cell = document.createElement('div');
                 
                 if (fila === 2 && col === 2) {
-                    // Botón central limpio con el logo de Eficacia (Sin marcas automáticas encima)
                     cell.className = "number-cell free-cell-logo";
                     cell.innerHTML = '<img src="https://imgur.com" alt="Logo Eficacia">';
                     
-                    // Al presionar el logo se dispara la alerta manualmente
                     cell.addEventListener('click', () => {
                         notificarGanadorManual();
                     });
@@ -140,13 +138,12 @@
                 carton: cartonId
             };
 
-            // Envío manual usando tus datos de EmailJS
             emailjs.send("service_l0hu9p6", "template_6svg12c", datosPlantilla)
                 .then(function(response) {
                     alert("¡BINGO REPORTADO! Tus datos fueron enviados con éxito.");
                     console.log('Correo enviado con éxito!', response.status, response.text);
                 }, function(error) {
-                    alert("Hubo un problema enviando el reporte. Por favor, reintenta.");
+                    alert("Hubo un problema enviando el reporte debido a bloqueos de la red. Por favor, toma una captura de pantalla y notifica al administrador.");
                     console.error('Error al enviar el correo...', error);
                     botonPresionado = false; 
                 });

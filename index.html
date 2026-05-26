@@ -89,27 +89,65 @@
             obtenerNumerosColumna(61, 75)   // O
         ];
 
-        // 3. Dibujar el tablero en pantalla
+               // 3. Dibujar el tablero en pantalla
         const board = document.getElementById('bingoBoard');
+        let juegoGanado = false; // Evita que se envíen múltiples correos
+
         for (let fila = 0; fila < 5; fila++) {
             for (let col = 0; col < 5; col++) {
                 const cell = document.createElement('div');
                 
-                // Casilla central libre
+                // Casilla central libre con el LOGO de tu compañía
                 if (fila === 2 && col === 2) {
                     cell.className = "number-cell free-cell marked";
-                    cell.innerText = "LIBRE";
+                    // REEMPLAZA ESTA URL POR EL ENLACE REAL DE TU LOGO (Debe ser un link público terminando en .png o .jpg)
+                    cell.innerHTML = '<img src="https://placeholder.com" alt="Logo" style="max-width: 90%; max-height: 90%; border-radius: 50%;">';
                 } else {
                     cell.className = "number-cell";
                     cell.innerText = columnas[col][fila];
+                    
                     // Evento de marcado fácil con un toque
                     cell.addEventListener('click', () => {
                         cell.classList.toggle('marked');
+                        verificarBingo(); // Cada vez que marquen, revisa si ganaron
                     });
                 }
                 board.appendChild(cell);
             }
         }
+
+        // Función para verificar si se llenó el cartón completo
+        function verificarBingo() {
+            if (juegoGanado) return; // Si ya ganó y notificó, no hace nada más
+
+            const todasLasCasillas = document.querySelectorAll('.number-cell');
+            let casillasMarcadas = 0;
+
+            todasLasCasillas.forEach(cell => {
+                if (cell.classList.contains('marked')) {
+                    casillasMarcadas++;
+                }
+            });
+
+            // Un cartón clásico tiene 25 casillas (incluyendo el centro libre)
+            if (casillasMarcadas === 25) {
+                juegoGanado = true;
+                notificarGanador();
+            }
+        }
+
+        // Función para enviar la alerta al correo
+        function notificarGanador() {
+            alert("¡FELICIDADES! ¡HAS HECHO BINGO!");
+            
+            const correoDestino = "darlin_villa@eficacia.com.co";
+            const asunto = encodeURIComponent("¡Alerta de Bingo Ganador!");
+            const mensaje = encodeURIComponent(`El participante ${nombre} con cédula ${cedula} y cartón N° ${cartonId} ha completado su cartón.`);
+            
+            // Método directo: Abre el gestor de correo del usuario listo para enviar
+            window.location.href = `mailto:${correoDestino}?subject=${asunto}&body=${mensaje}`;
+        }
+
     </script>
 </body>
 </html>

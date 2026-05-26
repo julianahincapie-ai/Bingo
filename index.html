@@ -20,10 +20,10 @@
         .number-cell { background: white; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; cursor: pointer; border-radius: 5px; user-select: none; transition: background 0.2s; }
         .number-cell.marked { background: #ff4757; color: white; border-radius: 50%; box-shadow: inset 0 0 10px rgba(0,0,0,0.3); }
         
-        /* Estilos específicos para la casilla central interactiva con el Logo */
-        .free-cell-logo { background: #ffffff; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 4px; cursor: pointer; border: 2px solid #2ed573; box-sizing: border-box; transition: transform 0.2s; }
+        /* Estilos corregidos para la casilla central interactiva (Botón de enviar) */
+        .free-cell-logo { background: #ffffff !important; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 4px; cursor: pointer; border: 3px solid #2ed573; box-sizing: border-box; border-radius: 5px; }
         .free-cell-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        .free-cell-logo:hover { transform: scale(1.05); }
+        .free-cell-logo:active { transform: scale(0.95); background-color: #e8f9ed !important; }
     </style>
 </head>
 <body>
@@ -103,11 +103,11 @@
                 const cell = document.createElement('div');
                 
                 if (fila === 2 && col === 2) {
-                    // Casilla del medio con la imagen de Eficacia actuando como botón manual
+                    // Botón central limpio con el logo de Eficacia (Sin marcas automáticas encima)
                     cell.className = "number-cell free-cell-logo";
                     cell.innerHTML = '<img src="https://imgur.com" alt="Logo Eficacia">';
                     
-                    // Al hacer clic en el logo, se ejecuta el reporte de ganador
+                    // Al presionar el logo se dispara la alerta manualmente
                     cell.addEventListener('click', () => {
                         notificarGanadorManual();
                     });
@@ -129,8 +129,7 @@
                 return;
             }
 
-            // Cuadro de confirmación para evitar envíos accidentales
-            const confirmar = confirm("¿Estás seguro de que completaste tu juego y deseas reportar ¡BINGO!?");
+            const confirmar = confirm("¿Completaste tu juego y deseas reportar ¡BINGO!?");
             if (!confirmar) return;
 
             botonPresionado = true;
@@ -141,7 +140,7 @@
                 carton: cartonId
             };
 
-            // Envío directo a través de tu cuenta vinculada de EmailJS
+            // Envío manual usando tus datos de EmailJS
             emailjs.send("service_l0hu9p6", "template_6svg12c", datosPlantilla)
                 .then(function(response) {
                     alert("¡BINGO REPORTADO! Tus datos fueron enviados con éxito.");
